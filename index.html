@@ -725,81 +725,183 @@ class App {
     const anyPos=Object.values(p.symptoms||{}).some(s=>s.value===true);
     const pos=Object.entries(p.symptoms||{}).filter(([,s])=>s.value===true);
     const taken=(p.adherence||[]).filter(d=>d.s==='taken').length;
+    const hour=new Date().getHours();
+    const greeting=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
 
     return `
-    <div style="padding:0 0 100px">
-      <!-- Hero status card -->
-      <div class="${anyPos?'':'teal-gradient'}" style="${anyPos?'background:linear-gradient(135deg,#E11D48,#9F1239)':''};padding:28px 20px 40px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-          <div>
-            <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.1em">Good morning</div>
-            <div style="font-size:22px;font-weight:900;color:white;margin-top:2px">${p.patientName}</div>
-          </div>
-          ${anyPos
-            ? `<div class="badge-danger danger-ring" style="font-size:11px;padding:6px 12px">${icon('alert-triangle','w-3 h-3 inline')} Flagged</div>`
-            : `<div class="badge-safe" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:white;font-size:11px">Stable</div>`}
+    <div style="padding:0 0 110px;background:#F8FAFC;min-height:100vh">
+
+      <!-- ── HERO: Bio-Sim Glowing Silhouette + Status ── -->
+      <div style="position:relative;overflow:hidden;padding:32px 20px 52px;background:linear-gradient(160deg,#002B5B 0%,#005FB8 55%,#00A3AD 100%)">
+        <!-- Glowing silhouette background -->
+        <div style="position:absolute;right:-20px;top:0;bottom:0;width:180px;opacity:0.18;display:flex;align-items:center;justify-content:center;pointer-events:none">
+          <svg viewBox="0 0 120 200" width="160" style="filter:drop-shadow(0 0 18px #00A3AD) drop-shadow(0 0 40px #005FB8)">
+            <ellipse cx="60" cy="38" rx="24" ry="24" fill="#00EFFF"/>
+            <path d="M20 200 Q20 120 60 110 Q100 120 100 200Z" fill="#00EFFF"/>
+            <line x1="60" y1="110" x2="20" y2="155" stroke="#00EFFF" stroke-width="8" stroke-linecap="round"/>
+            <line x1="60" y1="110" x2="100" y2="155" stroke="#00EFFF" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="60" cy="38" r="24" fill="none" stroke="#00EFFF" stroke-width="2" opacity="0.6" style="animation:pulse-ring 2s infinite"/>
+          </svg>
         </div>
-        <div style="background:rgba(255,255,255,0.15);border-radius:16px;padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-          <div style="text-align:center"><div style="font-size:22px;font-weight:900;color:white">${taken}</div><div style="font-size:10px;color:rgba(255,255,255,0.7);font-weight:600">Doses taken</div></div>
-          <div style="text-align:center;border-left:1px solid rgba(255,255,255,0.2);border-right:1px solid rgba(255,255,255,0.2)">
-            <div style="font-size:22px;font-weight:900;color:white">${pos.length}</div><div style="font-size:10px;color:rgba(255,255,255,0.7);font-weight:600">Active flags</div>
+        <!-- Decorative rings -->
+        <div style="position:absolute;right:40px;top:20px;width:120px;height:120px;border-radius:50%;border:1px solid rgba(0,239,255,0.12);pointer-events:none"></div>
+        <div style="position:absolute;right:20px;top:0px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(0,239,255,0.07);pointer-events:none"></div>
+
+        <div style="position:relative;z-index:2">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.12em">${greeting}</div>
+          <div style="font-size:24px;font-weight:900;color:white;margin-top:3px;letter-spacing:-0.3px">${p.patientName}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+            ${anyPos
+              ? `<div style="background:rgba(225,29,72,0.25);border:1px solid rgba(225,29,72,0.5);border-radius:20px;padding:5px 12px;font-size:10px;font-weight:800;color:#FCA5A5;text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;gap:5px"><div style="width:6px;height:6px;border-radius:50%;background:#F87171;animation:pulse-ring 1.2s infinite"></div>Symptoms Flagged</div>`
+              : `<div style="background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.4);border-radius:20px;padding:5px 12px;font-size:10px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;gap:5px"><div style="width:6px;height:6px;border-radius:50%;background:#34D399"></div>All Clear</div>`}
+            <div style="background:rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.7)">Room ${this.currentPatientCode}</div>
           </div>
-          <div style="text-align:center"><div style="font-size:22px;font-weight:900;color:white">${Object.values(p.symptoms||{}).filter(s=>s.value!==null).length}</div><div style="font-size:10px;color:rgba(255,255,255,0.7);font-weight:600">Answered</div></div>
+
+          <!-- Stats row -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:20px">
+            <div style="background:rgba(255,255,255,0.1);border-radius:14px;padding:12px;text-align:center;backdrop-filter:blur(8px)">
+              <div style="font-size:26px;font-weight:900;color:white;line-height:1">${taken}</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;margin-top:3px">Doses</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);border-radius:14px;padding:12px;text-align:center;backdrop-filter:blur(8px)">
+              <div style="font-size:26px;font-weight:900;color:${pos.length>0?'#FCA5A5':'white'};line-height:1">${pos.length}</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;margin-top:3px">Flags</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);border-radius:14px;padding:12px;text-align:center;backdrop-filter:blur(8px)">
+              <div style="font-size:26px;font-weight:900;color:white;line-height:1">${(taken/7*100).toFixed(0)}%</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;margin-top:3px">Adherence</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style="padding:0 16px;margin-top:-16px;display:flex;flex-direction:column;gap:12px">
+      <div style="padding:0 16px;margin-top:-20px;display:flex;flex-direction:column;gap:14px">
 
-        <!-- Daily check-in card -->
-        <div class="card" style="padding:20px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-            <div style="font-size:15px;font-weight:800;color:var(--vg-primary)">Daily Check-in</div>
-            <div class="badge-info">${icon('clock','w-3 h-3 inline mr-1')} Today</div>
+        <!-- ── WHY CORNER ── -->
+        <div style="background:linear-gradient(135deg,#EEF6FF,#E0F5F6);border:1px solid #B3D4EF;border-radius:20px;padding:18px;position:relative;overflow:hidden">
+          <div style="position:absolute;right:-8px;top:-8px;width:80px;height:80px;border-radius:50%;background:rgba(0,95,184,0.06)"></div>
+          <div style="display:flex;align-items:flex-start;gap:12px;position:relative;z-index:1">
+            <div style="width:38px;height:38px;border-radius:12px;background:var(--vg-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <span style="font-size:18px">💡</span>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:900;color:var(--vg-primary);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Why This App?</div>
+              <div style="font-size:13px;font-weight:600;color:#334155;line-height:1.5">If you're ever unconscious in an emergency room, <strong style="color:var(--vg-primary)">this app speaks for you</strong> — your medication history, allergies, and reactions are instantly available to any doctor.</div>
+            </div>
           </div>
+        </div>
+
+        <!-- ── DAILY CHECK-IN ── -->
+        <div style="background:white;border-radius:20px;border:1px solid rgba(0,43,91,0.07);padding:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div>
+              <div style="font-size:16px;font-weight:900;color:var(--vg-primary)">Daily Check-in</div>
+              <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:2px">How are you feeling today?</div>
+            </div>
+            <div style="background:var(--vg-blue-light);border-radius:10px;padding:6px 10px;font-size:10px;font-weight:800;color:var(--vg-secondary);text-transform:uppercase;letter-spacing:0.06em">${icon('clock','w-3 h-3 inline')} Today</div>
+          </div>
+
+          <!-- Quick emoji check-in -->
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+            ${['Great','Caution','Dizzy','Nauseous','Fatigued','Anxious'].map(label=>`
+            <div onclick="app.logEmojiSymptom('${label}')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+              <div style="width:40px;height:40px;border-radius:12px;background:${p._lastEmoji===label?'var(--vg-secondary)':'#F1F5F9'};display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.15s;border:2px solid ${p._lastEmoji===label?'var(--vg-secondary)':'transparent'}">${label==='Great'?'👍':label==='Caution'?'⚠️':label==='Dizzy'?'😵':label==='Nauseous'?'🤢':label==='Fatigued'?'😴':'😰'}</div>
+              <span style="font-size:8px;font-weight:700;color:${p._lastEmoji===label?'var(--vg-secondary)':'#94a3b8'};text-transform:uppercase">${label}</span>
+            </div>`).join('')}
+          </div>
+
           ${this.renderPatientCheckIn(p)}
         </div>
 
-        <!-- Adherence card -->
-        <div class="card" style="padding:20px">
-          <div style="font-size:15px;font-weight:800;color:var(--vg-primary);margin-bottom:14px">This week's medication</div>
-          <div style="display:flex;justify-content:space-between">
+        <!-- ── MEDICATION TRACKER ── -->
+        <div style="background:white;border-radius:20px;border:1px solid rgba(0,43,91,0.07);padding:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div>
+              <div style="font-size:16px;font-weight:900;color:var(--vg-primary)">Medication Tracker</div>
+              <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:2px">Tap a day to update</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:14px">
             ${(p.adherence||[]).map((d,i)=>`
             <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-              <span style="font-size:10px;font-weight:700;color:#94a3b8">${d.day}</span>
-              <div class="adh-dot ${d.s}" onclick="app.toggleDay(${i})">${d.s==='taken'?'✓':d.s==='missed'?'✗':'○'}</div>
+              <span style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">${d.day}</span>
+              <div class="adh-dot ${d.s}" onclick="app.toggleDay(${i})">${d.s==='taken'?'✓':d.s==='missed'?'✗':'·'}</div>
             </div>`).join('')}
           </div>
-          <div style="margin-top:12px">
-            <div class="prog-bar"><div class="prog-fill" style="width:${(taken/7*100).toFixed(0)}%"></div></div>
-            <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:6px">${taken}/7 doses taken · ${(taken/7*100).toFixed(0)}% adherence</div>
-          </div>
-        </div>
+          <div class="prog-bar"><div class="prog-fill" style="width:${(taken/7*100).toFixed(0)}%"></div></div>
+          <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:8px">${taken}/7 doses taken · ${(taken/7*100).toFixed(0)}% this week</div>
 
-        <!-- Room & drugs card -->
-        <div class="card" style="padding:20px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-            <div style="font-size:15px;font-weight:800;color:var(--vg-primary)">Your medications</div>
-            <div style="font-size:12px;font-weight:700;color:var(--vg-tertiary)">Room ${this.currentPatientCode}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">
+          <!-- Drug list -->
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid #F1F5F9">
             ${(p.drugs||[]).map(rx=>`
             <div style="background:#F8FAFC;border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
-              <div>
-                <div style="font-size:14px;font-weight:800;color:var(--vg-primary)">${rx.name}</div>
-                <div style="font-size:11px;color:#64748b;font-weight:600;margin-top:2px">${rx.dose} · ${rx.freq}</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:8px;height:8px;border-radius:50%;background:${rx.name===p.suspectedDrug?'#E11D48':'#10B981'}"></div>
+                <div>
+                  <div style="font-size:14px;font-weight:800;color:var(--vg-primary)">${rx.name}</div>
+                  <div style="font-size:11px;color:#64748b;font-weight:600;margin-top:1px">${rx.dose} · ${rx.freq}</div>
+                </div>
               </div>
-              <div style="font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;${rx.name===p.suspectedDrug?'background:#FFF1F2;color:#E11D48;border:1px solid #FECDD3':'background:var(--vg-blue-light);color:var(--vg-secondary);border:1px solid #B3D4EF'}">
+              <div style="font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;${rx.name===p.suspectedDrug?'background:#FFF1F2;color:#E11D48;border:1px solid #FECDD3':'background:#ECFDF5;color:#059669;border:1px solid #A7F3D0'}">
                 ${rx.name===p.suspectedDrug?'Monitored':'Active'}
               </div>
             </div>`).join('')}
           </div>
         </div>
 
-        <!-- Go to room chat -->
-        <button class="btn-primary" onclick="app.go('common-room')">${icon('message-circle','w-4 h-4')} Open care room chat</button>
+        <!-- ── DIGITAL HEALTH PASSPORT (Security Feature framing) ── -->
+        <div style="background:linear-gradient(135deg,#002B5B,#005FB8);border-radius:20px;padding:20px;position:relative;overflow:hidden">
+          <div style="position:absolute;right:-16px;bottom:-16px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.05)"></div>
+          <div style="position:absolute;right:20px;top:-20px;width:60px;height:60px;border-radius:50%;background:rgba(0,163,173,0.15)"></div>
+          <div style="display:flex;align-items:flex-start;gap:14px;position:relative;z-index:1">
+            <div style="width:44px;height:44px;border-radius:14px;background:rgba(0,163,173,0.25);border:1px solid rgba(0,163,173,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px">🛡️</div>
+            <div style="flex:1">
+              <div style="font-size:10px;font-weight:800;color:rgba(0,163,173,0.9);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Security Feature</div>
+              <div style="font-size:16px;font-weight:900;color:white;margin-bottom:6px">Digital Health Passport</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.65);line-height:1.5;font-weight:600">Your medical data is <span style="color:#67E8F9;font-weight:800">unchangeable</span> and <span style="color:#67E8F9;font-weight:800">tamper-proof</span> — a permanent safety net that protects you, not a reporting task.</div>
+              <div style="display:flex;gap:8px;margin-top:14px">
+                <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:8px 12px;text-align:center;flex:1">
+                  <div style="font-size:18px">🔒</div>
+                  <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-top:3px">Encrypted</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:8px 12px;text-align:center;flex:1">
+                  <div style="font-size:18px">⛓️</div>
+                  <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-top:3px">Unchangeable</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:8px 12px;text-align:center;flex:1">
+                  <div style="font-size:18px">🌐</div>
+                  <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-top:3px">Always On</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button onclick="app.go('blockchain')" style="width:100%;margin-top:16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">${icon('shield-check','w-4 h-4')} View My Health Passport</button>
+        </div>
 
-        <!-- Blockchain audit -->
-        <button class="btn-ghost" style="width:100%;justify-content:center" onclick="app.go('blockchain')">${icon('shield-check','w-4 h-4')} View blockchain audit trail</button>
+        <!-- ── EMERGENCY ROOM CARD ── -->
+        <div style="background:white;border:1.5px solid #FECDD3;border-radius:20px;padding:20px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#FFF1F2;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🚨</div>
+            <div>
+              <div style="font-size:15px;font-weight:900;color:#E11D48">Emergency Room Ready</div>
+              <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:1px">If you're ever unconscious...</div>
+            </div>
+          </div>
+          <div style="background:#FFF1F2;border-radius:12px;padding:14px;font-size:13px;color:#9F1239;font-weight:600;line-height:1.55">
+            Any ER doctor can scan your Viginyx QR code and instantly see your <strong>medications, allergies, and ADR history</strong> — even if you cannot speak.
+          </div>
+          ${p.emergencyContact?`<div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border-radius:12px;padding:12px 14px">
+            <div>
+              <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase">Emergency Contact</div>
+              <div style="font-size:14px;font-weight:800;color:var(--vg-primary);margin-top:2px">${p.emergencyContact}</div>
+            </div>
+            <button onclick="app.notifyEmergency()" style="background:#FFF1F2;color:#E11D48;border:1px solid #FECDD3;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer">Alert</button>
+          </div>`:''}
+        </div>
+
+        <!-- ── VIGIROOM QUICK ACCESS ── -->
+        <button class="btn-primary" onclick="app.go('common-room')" style="padding:16px">${icon('message-circle','w-5 h-5')} Open VigiRoom Chat</button>
+
       </div>
     </div>`;
   }
