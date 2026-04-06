@@ -390,7 +390,7 @@ class App {
       ? [{icon:'layout-dashboard',label:'Dashboard',view:'doctor-dashboard'},{icon:'users',label:'Patients',view:'doctor-dashboard'},{icon:'file-text',label:'Reports',view:'adr'},{icon:'settings',label:'Settings',view:'doctor-dashboard'}]
       : this.role==='pharmacist'
       ? [{icon:'layout-dashboard',label:'Overview',view:'pharmacist'},{icon:'package',label:'Inventory',view:'pharmacist-inventory'},{icon:'users',label:'Patients',view:'pharmacist'},{icon:'settings',label:'Settings',view:'pharmacist'}]
-      : [{icon:'home',label:'Home',view:'patient-home'},{icon:'activity',label:'Vitals',view:'patient-home'},{icon:'message-circle',label:'Room',view:'common-room'},{icon:'user',label:'Profile',view:'patient-home'}];
+      : [{icon:'pill',label:'Med Tracker',view:'patient-home'},{icon:'message-circle',label:'VigiRoom',view:'patient-home'},{icon:'bell',label:'VigiUpdates',view:'patient-home'},{icon:'user',label:'My Profile',view:'patient-home'}];
 
     return `
     <nav class="bottom-nav">
@@ -1759,6 +1759,15 @@ None(--vg-secondary);border-radius:50%;margin:0 auto 12px"></div>Loading your ro
     const content=el.value.trim(); el.value='';
     const name=this.role==='doctor'?('Dr. '+this.user.name):this.role==='patient'?(this.user.name):'Pharmacist';
     await this.postChat(this.currentPatientCode,this.role,name,content);
+  }
+
+  async logEmojiSymptom(label) {
+    const p=this.currentPatient; if(!p) return;
+    p._lastEmoji=label;
+    const msg=`${label==='Great'?'👍':label==='Caution'?'⚠️':label==='Dizzy'?'😵':label==='Nauseous'?'🤢':label==='Fatigued'?'😴':'😰'} Feeling ${label} — quick symptom log`;
+    await this.postChat(this.currentPatientCode,'patient',this.user.name,msg,'symptom');
+    await this.saveDoc('rooms',this.currentPatientCode,{_lastEmoji:label});
+    this.render();
   }
 
   handleEhrFile(file) {
